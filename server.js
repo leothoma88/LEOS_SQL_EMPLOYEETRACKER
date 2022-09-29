@@ -1,10 +1,10 @@
 
 const inquirer = require("inquirer");
-const queries = require('./queries')
-require('console.table')
+const queries = require("./queries")
+require("console.table")
 
 // Import and require mysql2
-const mysql = require('mysql2');
+const mysql = require("mysql2");
 
 const PORT = process.env.PORT || 3001;
 
@@ -25,142 +25,102 @@ const db = mysql.createConnection(
 
 // Query database
 
-let deletedRow = 2;
+// let deletedRow = 2;
 
-const findAllDepartmentsPromise = () => {
-    queries.findAllDepartments()
-    .then(([results]) => {
-        let departments = results;
-        console.table(departments)
-    })
-}
+// const findAllDepartmentsPromise = () => {
+//     queries.findAllDepartments()
+//     .then(([results]) => {
+//         let departments = results;
+//         console.table(departments)
+//     })
+// }
 
-const findAllDepartments = () => {
-    db.query('SELECT * FROM departments', function (err, results) {
-        console.table(results);
-    });
-}
+// const findAllDepartments = () => {
+//     db.query('SELECT * FROM departments', function (err, results) {
+//         console.table(results);
+//     });
+// }
 
 
-db.query(`DELETE FROM favorite_books WHERE id = ?`,deletedRow, (err, result) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log(result);
-});
+// db.query(`DELETE FROM favorite_books WHERE id = ?`,deletedRow, (err, result) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.log(result);
+// });
 
-// Query database
-db.query('SELECT * FROM departments', function (err, results) {
-  console.table(results);
-});
+// // Query database
+// db.query('SELECT * FROM departments', function (err, results) {
+//   console.table(results);
+// });
 
-// Default response for any other request (Not Found)
-app.use((req, res) => {
-  res.status(404).end();
-});
+// // Default response for any other request (Not Found)
+// app.use((req, res) => {
+//   res.status(404).end();
+// });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
 
 
 //Prompts
 
-const cardtemplates = [];
+// const cardtemplates = [];
 
 //Make page then adds the cards after prompts
-function startItUp(){ memberPush();pageGenerator()}
+// function startItUp(){ memberPush();pageGenerator()}
 
 
-//Function that creates the prompts neccesary for the user to answer,but now just in one go
-function memberPush(){
+//Opening intro prompt with functions to other prompts
+function introPrompt(){
 inquirer
-  .prompt([
-    {
-      type: 'input',
-      message: 'Enter name:',
-      name:"name",
-      validate: (value)=> {if(value){
-          return true} else{return "Please insert value"}}
-    },
-    {
-      type: 'input',
-      message: 'Enter your id:',
-      name:"id",
-      validate: (value)=> {if(value){
-        return true} else{return "Please insert value"}}
-    },
-    {
-      type: 'input',
-      message: 'Enter email',
-      name: 'email',
-      validate: (value)=> {if(value){
-        return true} else{return "Please insert value"}}
-    },
+  .prompt(
     {
       type: 'list',
-      message: 'License:',
-      choices:["Manager","Engineer","Intern"],
-      name: 'role',
-      validate: (value)=> {if(value){
-          return true} else{return "Please insert value"}}
-    },
-      
+      message: 'Which would you like to do?',
+      name:"start_menu",
+      choices:["View all departments",
+      "View all roles",
+      "View all employees",
+      "Add a department",
+      "Add a role",
+      "Add an employee",
+      "Update an employee",
+      "End"]
+    })
+   //Take what they choose and compare to the options in switch case. 
+  .then((response) =>{
+    switch(response.action){
+      case "View all departments":
+        viewAlldepartments();
+        break;
+      case "View all roles":
+        viewAllroles();
+        break;
+      case "View all employees":
+        viewAllemployees();
+        break
+      case "Add a department":
+        addAdepartment();
+        break
+      case "Add a role":
+        addArole();
+        break
+      case "Add an employee":
+        addAemployee();
+        break
+      case "Update an employee":
+        updateAemployee();
+        break
+      case "End":
+        Quit();
+        break
 
-
-  ])
-  .then(({name,id,email,role}) =>{
-//Takes over the only unshared attribute
-    var extraInfo = "";
-    if(role==="Manager"){
-      extraInfo="Office number: "
-
-    } else if (role=== "Engineer"){
-      extraInfo="GitHub: "
-    }else {
-      extraInfo="School: " 
 
     }
-//Continues the prompts after 
-    inquirer
-    .prompt([
-        {
-          type: 'input',
-          message: `Please enter ${extraInfo}: `,
-          name:"extraInfo",
-          validate: (value)=> {if(value){
-              return true} else{return "Please insert value"}}
-        },
-    { type: 'list',
-    message: 'Are there any other members you would like to add?',
-    choices:["yes","no"],
-    name: "addmore"
-   } ])
-
-   .then(function({extraInfo,addmore}){
-     console.log(name,id,email,"employeeinfo")
-     var newadd;
-     if(role=== "Manager"){
-       newadd = new Manager(name,id,email,extraInfo);
-     }else if (role === "Engineer"){
-       newadd = new Engineer(name,id,email,extraInfo);
-     } else{
-       newadd = new Intern (name,id,email,extraInfo);
-     }
-//Giving the option of continuing or finishing up
-     cardtemplates.push(newadd);
-     //Picks which role we have pushes to the html
-     addToHtmlBase(newadd)
-     .then(function() {
-       if(addmore === "yes"){
-         memberPush();
-       }else {
-         completed();
-       }
-     });
-   });
-  });
-}
+  
+  })
 
 //These are the cards being added to the made array of html
 function addToHtmlBase(employees){
