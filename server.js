@@ -1,21 +1,26 @@
-
-const inquirer = require("inquirer");
-const queries = require("./queries")
-require("console.table")
-
 // Import and require mysql2
 const mysql = require("mysql2");
-const Connection = require("mysql2/typings/mysql/lib/Connection");
+//Bring in Inquirer
+const inquirer = require("inquirer");
+
+// const queries = require("./queries")
+
+//Bring table npm in
+require("console.table")
+
+
+// const Connection = require("mysql2/typings/mysql/lib/Connection");
 
 const PORT = process.env.PORT || 3001;
 
 
 
 // Connect to database
-const db = mysql.createConnection(
+const connection = mysql.createConnection(
   {
     host: 'localhost',
     // MySQL username,
+
     user: 'root',
     // TODO: Add MySQL password
     password: 'M05d10Y93!!!',
@@ -129,7 +134,7 @@ function viewAlldepartments(){
 
   //start chosen prompt that ask user for department
   const fdeptCommand = "SELECT * FROM department";
-  db.query(fdeptCommand,function(err,res){
+  connection.query(fdeptCommand,function(err,res){
     if(err) throw err;
     console.log(`ALL DEPARTMENTS: `);
     console.table(res);
@@ -143,13 +148,15 @@ function viewAlldepartments(){
 
 function viewAllroles(){
   const froleCommand = "SELECT * FROM role";
-  db.query(froleCommand,function(err,res){
+  connection.query(froleCommand,function(err,res){
     if(err) throw err;
     console.log(`ALL ROLESS: `);
     console.table(res);
     })
     introPrompt();
 }
+
+//Query to find all employees
 
 function viewAllemployees(){
   const femployeeCommand = "SELECT * FROM employee";
@@ -160,3 +167,59 @@ function viewAllemployees(){
     })
     introPrompt();
   }
+
+  //Add a department
+
+  function addAdepartment(){
+
+    const addDept = "INSERT INTO department(name) VALUES (?)"
+
+    inquirer.prompt({
+      type: "input",
+      message: "Enter department name: ",
+      name: "department"
+    }).then((response)=>{
+      connection.query(addDept, response.department, function(err,res){
+        console.log("Department added")
+        introPrompt();
+      })
+    })
+  }
+
+  //Add role
+  function addArole() {
+    const addDept = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)"
+
+    inquirer.prompt({
+      type: "input",
+      message: "Enter the name of the role you are adding: ",
+      name: "role"
+    },
+    {
+      type: "input",
+      message: "Enter the salary of this position: ",
+      name: "salary"
+    },
+    {
+      type: "input",
+      message: "Enter the department of this position: ",
+      name: "dept"
+    }
+    ).then((response)=>{
+      connection.query(addDept, [response.title,response.salary, response.dept], function(err,res){
+        if(err) throw err;
+        console.log("Department added")
+        introPrompt();
+      })
+    })
+
+
+  }
+
+
+
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+  
