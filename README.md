@@ -11,7 +11,7 @@ The following image demonstrates the web application's appearance and functional
 
 ## Links
 
- https://github.com/leothoma88/LEOS_SQL_EMPLOYEETRACKER (Links to an external site.)
+ https://leothoma88.github.io/LEOS_SQL_EMPLOYEETRACKER/ (Links to an external site.)
 
  
 
