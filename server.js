@@ -1,5 +1,6 @@
 //Bring in Inquirer
 const inquirer = require("inquirer");
+const { format } = require("./db/connection");
 
 const connection = require("./db/connection")
 
@@ -14,58 +15,6 @@ require("console.table")
 
 const PORT = process.env.PORT || 3001;
 
-
-
-// Query database
-
-// let deletedRow = 2;
-
-// const findAllDepartmentsPromise = () => {
-//     queries.findAllDepartments()
-//     .then(([results]) => {
-//         let departments = results;
-//         console.table(departments)
-//     })
-// }
-
-// const findAllDepartments = () => {
-//     db.query('SELECT * FROM departments', function (err, results) {
-//         console.table(results);
-//     });
-// }
-
-
-// db.query(`DELETE FROM favorite_books WHERE id = ?`,deletedRow, (err, result) => {
-//   if (err) {
-//     console.log(err);
-//   }
-//   console.log(result);
-// });
-
-// // Query database
-// db.query('SELECT * FROM departments', function (err, results) {
-//   console.table(results);
-// });
-
-// // Default response for any other request (Not Found)
-// app.use((req, res) => {
-//   res.status(404).end();
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-
-//Prompts
-
-// const cardtemplates = [];
-
-//Make page then adds the cards after prompts
-// function startItUp(){ memberPush();pageGenerator()}
-
-
-//Opening intro prompt with functions to other prompts
 function introPrompt(){
 inquirer
   .prompt(
@@ -175,6 +124,25 @@ function viewAllemployees(){
 
   //Add role
   function addArole() {
+
+    //Make array of departments
+
+    function populatedepts(){
+      connection.query("SELECT * FROM department", function (err,data){
+        if(err) throw err;
+        for(i=0;i<data.length;i++){
+          Alldepartments.push({value: data[i].id ,name: data[i].name})
+        }
+      })
+    }
+
+    var Alldepartments= [];
+
+
+    populatedepts()
+
+
+
     const addDept = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)"
 
     inquirer.prompt([{
@@ -188,13 +156,17 @@ function viewAllemployees(){
       name: "salary"
     },
     {
-      type: "input",
+      type: "list",
       message: "Enter the department of this position: ",
+      choices: Alldepartments,
       name: "dept"
     }]
     ).then((response)=>{
-      connection.query(addDept, [response.title,response.salary, response.dept], function(err,res){
-        if(err) throw err;
+      console.log(response)
+      connection.query(addDept, [response.role,response.salary, response.dept], function(err,res){
+        if(err){
+          console.log(err)
+         throw err;}
         console.log("Department added")
         introPrompt();
       })
@@ -211,11 +183,11 @@ function viewAllemployees(){
       if (err) throw (err);
     
     
-    const roleChoices = data.map(({ id, title, salary }) => {
-      // console.log(id,title,salary)
-      return {value: id, title: title, salary: salary}
-      
-    });
+      const roleChoices = data.map(({ id, title,salary }) => ({
+        salary:`${salary}`,
+        name: `${title}`,
+        value: id,
+      }));
 
     inquirer.prompt([{
       type: "input",
@@ -270,9 +242,10 @@ function viewAllemployees(){
       connection.query(query, function (err, data) {
         if (err) throw err;
     
-        const employeeChoices = data.map(({ id, first_name, last_name }) => {
-         return {value: id, first_name: first_name, last_name: last_name}
-        });
+        const employeeChoices = data.map(({ id, first_name, last_name }) => ({
+          name: `${first_name} ${last_name}`,
+          value: id,
+        }));
 
       
 
@@ -280,9 +253,11 @@ function viewAllemployees(){
 
         if (err) throw err;
 
-      const roleChoices = data.map(({ id, title, salary }) => {
-        return {value: id, title: title, salary: salary}     
-       });
+        const roleChoices = data.map(({ id, title,salary }) => ({
+          salary:`${salary}`,
+          name: `${title}`,
+          value: id,
+        }));
       
         // console.table(res);
         // console.log("employeeArray To Update!\n")
